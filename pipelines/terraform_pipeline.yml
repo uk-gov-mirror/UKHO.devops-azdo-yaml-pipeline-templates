@@ -24,6 +24,11 @@ parameters:
     # NO default - Consumer must provide this
     displayName: 'List of environment configurations (see docs/definition_docs/terraform_pipeline/environment_config.md)'
 
+  - name: IsDestroy
+    type: boolean
+    default: false
+    displayName: 'Indicates if the terraform destroy command should be executed'
+
 stages:
   - template: /stages/terraform_build.yml
     parameters:
@@ -38,4 +43,5 @@ stages:
           ${{ if or(not(environmentConfig.Name), eq(environmentConfig.Name, '')) }}:
             "an environment name is not properly defined and is a required field.": "Error"
           TerraformVersion: ${{ parameters.TerraformVersion }}
+          IsDestroy: ${{ parameters.IsDestroy }}
           EnvironmentConfig: ${{ environmentConfig }}

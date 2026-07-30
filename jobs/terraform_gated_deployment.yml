@@ -41,6 +41,11 @@ parameters:
     type: object
     # NO default - Consumer must provide this
     displayName: 'Terraform deployment configuration object (see docs/definition_docs/terraform_pipeline/terraform_deployment_config.md)'
+  
+  - name: IsDestroy
+    type: boolean
+    default: false
+    displayName: 'Indicates if the terraform destroy command should be executed'
 
 jobs:
   - ${{ if in(parameters.TerraformDeploymentConfig.RunMode, 'PlanVerifyApply', 'PlanOnly') }}:
@@ -65,7 +70,8 @@ jobs:
           DependsOn: TerraformDeployPlan_${{ parameters.TerraformArtifactName }}
           Instructions: 'Please validate the terraform plan is acceptable to apply'
 
-  - ${{ if in(parameters.TerraformDeploymentConfig.RunMode, 'PlanVerifyApply', 'ApplyOnly') }}:
+
+  - ${{ if and(in(parameters.TerraformDeploymentConfig.RunMode, 'PlanVerifyApply', 'ApplyOnly'), eq(parameters.IsDestroy, false)) }}:
       - template: /jobs/terraform_deploy.yml
         parameters:
           CheckoutAlias: ${{ parameters.CheckoutAlias }}
@@ -90,6 +96,18 @@ jobs:
           Pool: ${{ parameters.Pool }}
           TerraformArtifactName: ${{ parameters.TerraformArtifactName }}
           TerraformVersion: ${{ parameters.TerraformVersion }}
-          TerraformDeploymentConfig: ${{ parameters.TerraformDeploymentConfig }}
+          TerraformDeploymentConfig: ${{ parameters.TerraformDeploymentConfig }}z
           EnvironmentName: ${{ parameters.EnvironmentName }}
 
+  - ${{ if eq(parameters.IsDestroy, true) }}:
+      - template: /jobs/terraform_deploy.yml
+        parameters:
+          CheckoutAlias: ${{ parameters.CheckoutAlias }}
+          TerraformDeployMode: Destroy
+          DependsOn: ${{ parameters.DependsOn }}
+          Condition: ${{ parameters.Condition }}
+          Pool: ${{ parameters.Pool }}
+          TerraformArtifactName: ${{ parameters.TerraformArtifactName }}
+          TerraformVersion: ${{ parameters.TerraformVersion }}
+          TerraformDeploymentConfig: ${{ parameters.TerraformDeploymentConfig }}
+          EnvironmentName: ${{ parameters.EnvironmentName }}

@@ -14,6 +14,11 @@ parameters:
     # NO default - Consumer must provide this
     displayName: 'Environment configuration object (see docs/definition_docs/terraform_pipeline/environment_config.md)'
 
+  - name: IsDestroy
+    type: boolean
+    default: false
+    displayName: 'Indicates if the terraform destroy command should be executed'
+
 stages:
   - stage: Deploy_${{ parameters.EnvironmentConfig.Name }}_Terraform
     displayName: 'Deploy ${{ parameters.EnvironmentConfig.Name }} Terraform'
@@ -32,3 +37,4 @@ stages:
           TerraformArtifactName: ${{ parameters.TerraformArtifactName }}
           EnvironmentName: ${{ parameters.EnvironmentConfig.Name }}
           TerraformDeploymentConfig: ${{ parameters.EnvironmentConfig.TerraformDeploymentConfig }}
+          IsDestroy: ${{ parameters.IsDestroy }}

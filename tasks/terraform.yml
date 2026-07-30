@@ -93,6 +93,7 @@ parameters:
       - validate
       - plan
       - apply
+      - destroy
       - output
       - custom
     displayName: 'Terraform command (required)'

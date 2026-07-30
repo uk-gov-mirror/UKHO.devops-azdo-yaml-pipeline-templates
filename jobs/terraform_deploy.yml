@@ -6,7 +6,8 @@ parameters:
     values:
       - Apply
       - Plan
-    displayName: 'The terraform deploy mode: plan or apply'
+      - Destroy
+    displayName: 'The terraform deploy mode: plan, apply, or destroy'
 
   - name: CheckoutAlias
     type: string
@@ -193,6 +194,16 @@ jobs:
                 - template: /tasks/terraform.yml
                   parameters:
                     Command: apply
+                    CommandOptions: $(VariableFilesCommandOption) -input=false -auto-approve
+                    WorkingDirectory: $(TerraformWorkingDirectory)
+                    TaskEnvironmentVariables: ${{ parameters.TerraformDeploymentConfig.EnvironmentVariableMappings }}
+                    ${{ if parameters.TerraformDeploymentConfig.AzureServiceConnection }}:
+                      ServiceConnection: ${{ parameters.TerraformDeploymentConfig.AzureServiceConnection }}
+            
+            - ${{ if eq(parameters.TerraformDeployMode, 'Destroy') }}:
+                - template: /tasks/terraform.yml
+                  parameters:
+                    Command: destroy
                     CommandOptions: $(VariableFilesCommandOption) -input=false -auto-approve
                     WorkingDirectory: $(TerraformWorkingDirectory)
                     TaskEnvironmentVariables: ${{ parameters.TerraformDeploymentConfig.EnvironmentVariableMappings }}
